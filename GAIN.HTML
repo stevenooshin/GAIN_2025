@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Physique Transformation Blueprint</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Midnight Gold -->
+    <!-- Application Structure Plan: A tab-based dashboard structure was chosen for optimal usability. This design allows the user to quickly switch between the core pillars of their plan—Dashboard, Nutrition, Training, and Progress—without scrolling through a long document. This non-linear navigation is more intuitive for daily use, where a user might only need to check their workout for the day or log their weight. Key interactions include tab switching to reveal content sections, and interactive charts to visualize nutritional breakdowns and weight progress, making complex information easily digestible. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Caloric/Macro Targets -> Goal: Inform -> Viz: Donut Chart -> Interaction: Hover for details -> Justification: Provides an immediate, clear visual breakdown of daily nutritional goals -> Library: Chart.js.
+        - Report Info: Meal Plan -> Goal: Organize -> Presentation: Interactive Table/Cards -> Interaction: N/A -> Justification: A structured table is the clearest way to present a daily eating schedule.
+        - Report Info: Workout Program -> Goal: Organize -> Presentation: Tabbed Cards -> Interaction: Click tabs for different workouts -> Justification: Organizes a week of complex workouts into a manageable, non-overwhelming interface.
+        - Report Info: Progress Tracking -> Goal: Change over time -> Viz: Line Chart -> Interaction: Hover over points to see weekly data -> Justification: A line chart is the standard and most effective way to visualize weight trends against a target range.
+        - Report Info: Flexibility/Warm-ups -> Goal: Inform -> Presentation: Icon-based lists -> Interaction: N/A -> Justification: Visual icons paired with text make routines easy to follow and remember.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1A202C; /* Dark Blue/Grey */
+            color: #E2E8F0; /* Light Grey */
+        }
+        .tab-active {
+            background-color: #F6AD55; /* Gold */
+            color: #1A202C;
+            border-color: #F6AD55;
+        }
+        .tab-inactive {
+            background-color: #2D3748;
+            color: #F6AD55;
+            border-color: #4A5568;
+        }
+        .card {
+            background-color: #2D3748; /* Darker Card BG */
+            border-radius: 0.75rem;
+            border: 1px solid #4A5568;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .prose-dark {
+            color: #A0AEC0;
+        }
+        .checklist-item label {
+            transition: color 0.2s ease-in-out;
+        }
+        .checklist-item input:checked + label {
+            text-decoration: line-through;
+            color: #63B3ED;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-[#F6AD55]">Your Transformation Blueprint</h1>
+            <p class="mt-2 text-lg text-gray-400">From 55kg to 75kg: Your Interactive Guide to Mass & Health</p>
+        </header>
+
+        <div id="tabs" class="mb-8 flex justify-center flex-wrap gap-2">
+            <button data-tab="dashboard" class="tab tab-active px-6 py-2 font-semibold rounded-full border transition">Dashboard</button>
+            <button data-tab="nutrition" class="tab tab-inactive px-6 py-2 font-semibold rounded-full border transition">Nutrition</button>
+            <button data-tab="training" class="tab tab-inactive px-6 py-2 font-semibold rounded-full border transition">Training</button>
+            <button data-tab="health" class="tab tab-inactive px-6 py-2 font-semibold rounded-full border transition">Health & Flexibility</button>
+            <button data-tab="progress" class="tab tab-inactive px-6 py-2 font-semibold rounded-full border transition">Progress</button>
+        </div>
+
+        <main id="tab-content">
+            <!-- Dashboard Content -->
+            <div id="dashboard-content" class="content">
+                 <div class="text-center mb-8 p-6 card">
+                    <h2 class="text-2xl font-bold text-[#F6AD55] mb-4">Welcome to Your Journey</h2>
+                    <p class="prose-dark leading-relaxed max-w-3xl mx-auto">This dashboard is your central hub for the transformation plan. It's built on three core principles: a consistent caloric surplus to fuel growth, progressive overload in your training to build muscle, and a focus on holistic health to protect your future. Your goal of gaining 20kg is a marathon, not a sprint. Use the tabs above to navigate between your nutrition plan, your workout schedule, and your progress tracker. Stay consistent, trust the process, and let's build a stronger, healthier you.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="card p-6">
+                        <h3 class="font-bold text-xl mb-4 text-[#F6AD55]">Daily Accountability</h3>
+                        <p id="current-date" class="text-sm text-gray-400 mb-4"></p>
+                        <div id="daily-checklist" class="space-y-3"></div>
+                    </div>
+                     <div class="card p-6">
+                        <h3 class="font-bold text-xl mb-2 text-[#F6AD55]">Today's Focus</h3>
+                        <p class="prose-dark mb-4">Your key metrics for today.</p>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="font-semibold">Target Calories:</span>
+                                <span class="font-bold text-lg text-[#F6AD55]">3,600 kcal</span>
+                            </div>
+                             <div class="flex items-center justify-between">
+                                <span class="font-semibold">Target Protein:</span>
+                                <span class="font-bold text-lg text-[#F6AD55]">146 g</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="font-semibold">Today's Workout:</span>
+                                <span id="today-workout" class="font-bold text-lg text-[#F6AD55]"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="font-bold text-xl mb-2 text-[#F6AD55]">Weekly Goal</h3>
+                        <p class="prose-dark mb-4">Aim for a steady and sustainable weight gain.</p>
+                        <div class="text-center">
+                            <p class="text-4xl font-bold text-green-400">+0.25 to +0.5 kg</p>
+                            <p class="text-sm text-gray-400 mt-1">per week</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nutrition Content -->
+            <div id="nutrition-content" class="content hidden">
+                <div class="text-center mb-8 p-6 card">
+                    <h2 class="text-2xl font-bold text-[#F6AD55] mb-4">Nutritional Blueprint</h2>
+                    <p class="prose-dark leading-relaxed max-w-3xl mx-auto">Nutrition is the foundation of your growth. This section details your daily caloric and macronutrient targets, designed to put you in a consistent but controlled caloric surplus. Below, you'll find a sample meal plan built with affordable, easy-to-prepare foods, perfect for a busy schedule. The goal is to consistently fuel your body for intense workouts and optimal recovery.</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold text-center mb-4">Daily Macronutrient Targets</h3>
+                        <div class="chart-container">
+                            <canvas id="macroChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold text-center mb-4">Sample Daily Meal Plan (~3,600 kcal)</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead>
+                                    <tr class="border-b border-gray-600">
+                                        <th class="py-2">Time</th>
+                                        <th class="py-2">Meal</th>
+                                        <th class="py-2">Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="meal-plan-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Training Content -->
+            <div id="training-content" class="content hidden">
+                 <div class="text-center mb-8 p-6 card">
+                    <h2 class="text-2xl font-bold text-[#F6AD55] mb-4">Hypertrophy Training Protocol</h2>
+                    <p class="prose-dark leading-relaxed max-w-3xl mx-auto">This is where you provide the stimulus for muscle growth. The program is structured as an Upper/Lower split, allowing you to train each muscle group twice per week for optimal results. The key to long-term success is progressive overload: consistently striving to lift more weight or do more reps. Use the tabs below to view the specific exercises for each training day.</p>
+                </div>
+                <div class="card p-6">
+                    <div id="workout-tabs" class="flex border-b border-gray-600 mb-4 justify-center flex-wrap">
+                        <button data-workout="upperA" class="workout-tab py-2 px-4 text-gray-400 font-semibold border-b-2 border-transparent">Upper A (Push)</button>
+                        <button data-workout="lowerA" class="workout-tab py-2 px-4 text-gray-400 font-semibold border-b-2 border-transparent">Lower A (Quad)</button>
+                        <button data-workout="upperB" class="workout-tab py-2 px-4 text-gray-400 font-semibold border-b-2 border-transparent">Upper B (Pull)</button>
+                        <button data-workout="lowerB" class="workout-tab py-2 px-4 text-gray-400 font-semibold border-b-2 border-transparent">Lower B (Ham/Glute)</button>
+                    </div>
+                    <div id="workout-details"></div>
+                </div>
+            </div>
+            
+            <!-- Health & Flexibility Content -->
+            <div id="health-content" class="content hidden">
+                <div class="text-center mb-8 p-6 card">
+                    <h2 class="text-2xl font-bold text-[#F6AD55] mb-4">Health, Flexibility & Recovery</h2>
+                    <p class="prose-dark leading-relaxed max-w-3xl mx-auto">Building muscle is only one part of the equation. This section is crucial for your long-term health, injury prevention, and addressing your flexibility goals. The dynamic warm-up prepares your body for lifting, while the static cool-down improves flexibility over time. Your cardio sessions are vital for heart health, especially given your family history and desk job. Don't skip these.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-4 text-center">Dynamic Warm-Up</h3>
+                        <ul id="warmup-list" class="space-y-3"></ul>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-4 text-center">Static Cool-Down</h3>
+                        <ul id="cooldown-list" class="space-y-3"></ul>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-4 text-center">Cardio for Heart Health</h3>
+                        <div class="text-center">
+                             <div class="text-5xl mb-4">❤️</div>
+                             <p class="font-semibold text-lg">2-3 Sessions / Week</p>
+                             <p class="text-gray-400">30-45 minutes</p>
+                             <p class="mt-2 text-sm text-gray-500">Low-Intensity Steady State (LISS) - conversational pace.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Content -->
+            <div id="progress-content" class="content hidden">
+                <div class="text-center mb-8 p-6 card">
+                    <h2 class="text-2xl font-bold text-[#F6AD55] mb-4">Monthly Review & Adjustment</h2>
+                    <p class="prose-dark leading-relaxed max-w-3xl mx-auto">What gets measured gets managed. This section is your command center for tracking progress and making data-driven adjustments to your plan. By tracking your average weekly weight, you can ensure you're gaining at the optimal rate for lean mass. The chart below helps you visualize this trend against your target. Use the flowchart to decide when and how to adjust your calories to keep the gains coming.</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold text-center mb-4">Weekly Weight Tracker</h3>
+                        <div class="chart-container h-96">
+                            <canvas id="progressChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold text-center mb-4">Decision-Making Flowchart</h3>
+                        <div class="space-y-4" id="decision-flowchart">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const tabs = document.querySelectorAll('.tab');
+        const contents = document.querySelectorAll('.content');
+        const workoutTabs = document.querySelectorAll('.workout-tab');
+
+        const mealPlanData = [
+            { time: "7:00 AM", meal: "Breakfast", details: "1.5 cups oats, 1 scoop whey, 2 whole eggs, 1 banana" },
+            { time: "10:00 AM", meal: "Snack 1", details: "1 cup Greek yogurt, 30g almonds" },
+            { time: "1:00 PM", meal: "Lunch", details: "200g chicken breast, 1.5 cups brown rice, 1 cup veggies, 1 tbsp olive oil" },
+            { time: "4:00 PM", meal: "Pre-Workout", details: "1 large apple, 2 tbsp peanut butter" },
+            { time: "6:30 PM", meal: "Post-Workout", details: "1 serving Mass Gainer, 5g Creatine" },
+            { time: "8:00 PM", meal: "Dinner", details: "200g lean beef (or 1.5 cups lentils), 1 large sweet potato, salad" },
+        ];
+
+        const workoutData = {
+            upperA: [
+                { name: "Dumbbell Bench Press", sets: 3, reps: "8-12", rest: "90s" },
+                { name: "Dumbbell Shoulder Press", sets: 3, reps: "10-15", rest: "60s" },
+                { name: "Incline Dumbbell Press", sets: 3, reps: "10-15", rest: "60s" },
+                { name: "Dumbbell Lateral Raises", sets: 3, reps: "12-20", rest: "60s" },
+                { name: "Triceps Pushdowns", sets: 3, reps: "12-15", rest: "60s" },
+                { name: "Push-ups", sets: 2, reps: "AMRAP", rest: "60s" },
+            ],
+            lowerA: [
+                { name: "Dumbbell Goblet Squats", sets: 4, reps: "8-12", rest: "90s" },
+                { name: "Dumbbell Walking Lunges", sets: 3, reps: "10-15/leg", rest: "90s" },
+                { name: "Leg Press", sets: 3, reps: "10-15", rest: "90s" },
+                { name: "Leg Extensions", sets: 3, reps: "12-20", rest: "60s" },
+                { name: "Standing Calf Raises", sets: 4, reps: "15-20", rest: "45s" },
+            ],
+            upperB: [
+                { name: "Pull-ups / Lat Pulldowns", sets: 3, reps: "AMRAP/8-12", rest: "90s" },
+                { name: "Bent-Over Dumbbell Rows", sets: 3, reps: "8-12", rest: "90s" },
+                { name: "Seated Cable Rows", sets: 3, reps: "10-15", rest: "60s" },
+                { name: "Face Pulls", sets: 3, reps: "15-20", rest: "60s" },
+                { name: "Dumbbell Bicep Curls", sets: 3, reps: "10-15", rest: "60s" },
+                { name: "Hammer Curls", sets: 3, reps: "12-15", rest: "60s" },
+            ],
+            lowerB: [
+                { name: "Dumbbell RDLs", sets: 4, reps: "10-15", rest: "90s" },
+                { name: "Bulgarian Split Squats", sets: 3, reps: "10-12/leg", rest: "90s" },
+                { name: "Lying Leg Curls", sets: 3, reps: "12-15", rest: "60s" },
+                { name: "Glute Bridges", sets: 3, reps: "15-20", rest: "60s" },
+                { name: "Seated Calf Raises", sets: 4, reps: "15-20", rest: "45s" },
+            ]
+        };
+        
+        const healthData = {
+            warmup: [
+                { icon: '🤸', text: 'Jumping Jacks: 60 seconds' },
+                { icon: '🔄', text: 'Arm Circles: 30s fwd, 30s back' },
+                { icon: '🦵', text: 'Leg Swings (fwd/back): 10 per leg' },
+                { icon: '↔️', text: 'Leg Swings (side-to-side): 10 per leg' },
+                { icon: '🏋️', text: 'Bodyweight Squats: 15 reps' },
+                { icon: ' ', text: 'Walking Lunges w/ Twist: 10 per leg' },
+                { icon: '🐛', text: 'Inchworms: 8 reps' },
+            ],
+            cooldown: [
+                { icon: '🧘', text: 'Standing Hamstring Stretch: 30s per leg' },
+                { icon: '🧘‍♂️', text: 'Kneeling Hip Flexor Stretch: 30s per leg' },
+                { icon: '🧘‍♀️', text: 'Figure-Four Stretch (Glutes): 30s per leg' },
+                { icon: '🧘', text: 'Knee-to-Chest Stretch: 30s per leg' },
+                { icon: '🚪', text: 'Doorway Chest Stretch: 30 seconds' },
+            ]
+        };
+
+        const decisionFlowchartData = [
+            { question: "Is my avg. weekly weight gain between 0.25-0.5 kg?", yes: "YES: Am I getting stronger in the gym?", no: "NO: Is my weight gain LESS than 0.25 kg/week?" },
+            { question: "Am I getting stronger in the gym?", yes: "YES: ✅ MAKE NO CHANGES. The plan is working.", no: "NO: ⚠️ Focus on training intensity, sleep, and recovery. Do not adjust calories yet." },
+            { question: "Is my weight gain LESS than 0.25 kg/week?", yes: "YES: ⬆️ Increase daily calories by 250 kcal.", no: "NO: ⬇️ Decrease daily calories by 200-250 kcal (gain is too fast)." },
+        ];
+
+        const checklistItems = [
+            { id: "calories", text: "Met Calorie Target" },
+            { id: "protein", text: "Met Protein Target" },
+            { id: "workout", text: "Completed Workout" },
+            { id: "stretching", text: "Completed Stretching" },
+            { id: "supplements", text: "Took Supplements" },
+        ];
+
+        function showTab(tabName) {
+            tabs.forEach(tab => {
+                if (tab.dataset.tab === tabName) {
+                    tab.classList.remove('tab-inactive');
+                    tab.classList.add('tab-active');
+                } else {
+                    tab.classList.remove('tab-active');
+                    tab.classList.add('tab-inactive');
+                }
+            });
+
+            contents.forEach(content => {
+                if (content.id === `${tabName}-content`) {
+                    content.classList.remove('hidden');
+                } else {
+                    content.classList.add('hidden');
+                }
+            });
+        }
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                showTab(tab.dataset.tab);
+            });
+        });
+
+        function renderWorkout(workoutKey) {
+            const container = document.getElementById('workout-details');
+            container.innerHTML = '';
+            const exercises = workoutData[workoutKey];
+            const grid = document.createElement('div');
+            grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
+            
+            exercises.forEach(ex => {
+                grid.innerHTML += `
+                    <div class="border border-gray-700 rounded-lg p-4 bg-gray-800">
+                        <h4 class="font-bold text-md text-[#F6AD55]">${ex.name}</h4>
+                        <div class="flex justify-between text-sm mt-2 text-gray-400">
+                            <span>Sets: <strong class="text-white">${ex.sets}</strong></span>
+                            <span>Reps: <strong class="text-white">${ex.reps}</strong></span>
+                            <span>Rest: <strong class="text-white">${ex.rest}</strong></span>
+                        </div>
+                    </div>
+                `;
+            });
+            container.appendChild(grid);
+        }
+
+        workoutTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                workoutTabs.forEach(t => {
+                    t.classList.remove('border-[#F6AD55]', 'text-[#F6AD55]');
+                    t.classList.add('border-transparent', 'text-gray-400');
+                });
+                tab.classList.add('border-[#F6AD55]', 'text-[#F6AD55]');
+                tab.classList.remove('border-transparent', 'text-gray-400');
+                renderWorkout(tab.dataset.workout);
+            });
+        });
+
+        function populateMealPlan() {
+            const tbody = document.getElementById('meal-plan-body');
+            mealPlanData.forEach(meal => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-gray-700 hover:bg-gray-700">
+                        <td class="py-3 px-1 font-semibold">${meal.time}</td>
+                        <td class="py-3 px-1 font-semibold text-[#F6AD55]">${meal.meal}</td>
+                        <td class="py-3 px-1 text-gray-400">${meal.details}</td>
+                    </tr>
+                `;
+            });
+        }
+        
+        function populateHealthLists() {
+            const warmupList = document.getElementById('warmup-list');
+            healthData.warmup.forEach(item => {
+                warmupList.innerHTML += `<li class="flex items-center"><span class="mr-3 text-xl">${item.icon}</span><span>${item.text}</span></li>`;
+            });
+            const cooldownList = document.getElementById('cooldown-list');
+            healthData.cooldown.forEach(item => {
+                cooldownList.innerHTML += `<li class="flex items-center"><span class="mr-3 text-xl">${item.icon}</span><span>${item.text}</span></li>`;
+            });
+        }
+
+        function populateDecisionFlowchart() {
+            const container = document.getElementById('decision-flowchart');
+            decisionFlowchartData.forEach(item => {
+                container.innerHTML += `
+                    <div class="border border-gray-700 rounded-lg p-4 bg-gray-800">
+                        <p class="font-semibold mb-2">${item.question}</p>
+                        <div class="text-sm space-y-1 text-gray-400">
+                            <p>${item.yes}</p>
+                            <p>${item.no}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function setTodaysWorkout() {
+            const day = new Date().getDay(); // Sunday - 0, Monday - 1, etc.
+            let workout = "Rest / Active Recovery";
+            const schedule = { 1: "Upper A (Push)", 2: "Lower A (Quad)", 4: "Upper B (Pull)", 5: "Lower B (Ham/Glute)" };
+            if (schedule[day]) {
+                workout = schedule[day];
+            }
+            document.getElementById('today-workout').textContent = workout;
+        }
+
+        function setupDailyChecklist() {
+            const container = document.getElementById('daily-checklist');
+            const today = new Date().toISOString().slice(0, 10);
+            const storageKey = `checklist-${today}`;
+            let savedState = JSON.parse(localStorage.getItem(storageKey)) || {};
+
+            checklistItems.forEach(item => {
+                const isChecked = savedState[item.id] || false;
+                container.innerHTML += `
+                    <div class="checklist-item flex items-center">
+                        <input type="checkbox" id="${item.id}" data-task="${item.id}" class="h-4 w-4 rounded" ${isChecked ? 'checked' : ''}>
+                        <label for="${item.id}" class="ml-2 text-gray-300">${item.text}</label>
+                    </div>
+                `;
+            });
+
+            container.addEventListener('change', (e) => {
+                if(e.target.type === 'checkbox') {
+                    savedState[e.target.dataset.task] = e.target.checked;
+                    localStorage.setItem(storageKey, JSON.stringify(savedState));
+                }
+            });
+        }
+
+        function displayDate() {
+            const dateEl = document.getElementById('current-date');
+            const today = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            dateEl.textContent = today.toLocaleDateString('en-US', options);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            populateMealPlan();
+            populateHealthLists();
+            populateDecisionFlowchart();
+            setTodaysWorkout();
+            displayDate();
+            setupDailyChecklist();
+
+            workoutTabs[0].click();
+            
+            Chart.defaults.color = '#A0AEC0';
+            Chart.defaults.borderColor = '#4A5568';
+
+            const macroCtx = document.getElementById('macroChart').getContext('2d');
+            new Chart(macroCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Protein (146g)', 'Carbs (529g)', 'Fats (100g)'],
+                    datasets: [{
+                        label: 'Macronutrients',
+                        data: [584, 2116, 900],
+                        backgroundColor: ['#F6AD55', '#ED8936', '#DD6B20'],
+                        borderColor: '#2D3748',
+                        borderWidth: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#E2E8F0' } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.parsed} kcal`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const progressCtx = document.getElementById('progressChart').getContext('2d');
+            new Chart(progressCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7', 'Week 8'],
+                    datasets: [
+                        {
+                            label: 'Your Weight (kg)',
+                            data: [55, 55.4, 55.7, 56.2, 56.5, 57.0, 57.3, 57.8],
+                            borderColor: '#F6AD55',
+                            backgroundColor: 'rgba(246, 173, 85, 0.2)',
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Target Min Gain (+0.25kg/wk)',
+                            data: [55, 55.25, 55.5, 55.75, 56, 56.25, 56.5, 56.75],
+                            borderColor: 'rgba(66, 153, 225, 0.7)',
+                            borderDash: [5, 5],
+                            fill: false,
+                        },
+                         {
+                            label: 'Target Max Gain (+0.5kg/wk)',
+                            data: [55, 55.5, 56, 56.5, 57, 57.5, 58, 58.5],
+                            borderColor: 'rgba(245, 101, 101, 0.7)',
+                            borderDash: [5, 5],
+                            fill: false,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: false, ticks: { color: '#A0AEC0' } },
+                        x: { ticks: { color: '#A0AEC0' } }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#E2E8F0' } },
+                        tooltip: { mode: 'index', intersect: false }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+ 
