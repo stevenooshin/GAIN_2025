@@ -255,8 +255,10 @@
         // --- FIREBASE INIT & CONFIG ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'transformation-app-2026';
         
+        // 🚨 IMPORTANT FOR GITHUB: Paste your EXACT Firebase config here! 🚨
+        // Go to Firebase -> Project Settings (Gear icon) -> General -> "Your apps"
         let firebaseConfig = {
-            apiKey: "AIzaSyB-tRi_B3fy1cXzkPPToSshS5U9nyLd5lw",
+            apiKey: "AIzaSyB-tRI_B3fy1cXzkPPToSshS5U9nyLd5lw",
             authDomain: "rise-and-shine-a36bd.firebaseapp.com",
             projectId: "rise-and-shine-a36bd",
             storageBucket: "rise-and-shine-a36bd.firebasestorage.app",
@@ -265,6 +267,7 @@
             measurementId: "G-QNPLY556R5"
         };
         
+        // Safely fallback for the canvas preview (does not affect your GitHub deployment)
         try {
             if (typeof __firebase_config !== 'undefined' && __firebase_config) {
                 firebaseConfig = JSON.parse(__firebase_config);
