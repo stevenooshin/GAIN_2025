@@ -268,8 +268,6 @@
         try {
             if (typeof __firebase_config !== 'undefined' && __firebase_config) {
                 firebaseConfig = JSON.parse(__firebase_config);
-            } else if (Object.keys(firebaseConfig).length === 0) {
-                firebaseConfig = { projectId: "mock-project" }; 
             }
         } catch(e) { 
             console.error("Firebase config parsing error:", e);
@@ -456,7 +454,7 @@
                 }
             } catch (error) {
                 console.error("Auth Error:", error);
-                document.getElementById('checklist-loading').innerHTML = `<span class="text-red-500">Auth Error: ${error.message} <br> (Did you authorize your GitHub domain in Firebase Settings?)</span>`;
+                document.getElementById('checklist-loading').innerHTML = `<span class="text-red-500">Auth Error: ${error.message} <br> (Please clear your Safari cache or open in a Private Tab)</span>`;
             }
         }
 
