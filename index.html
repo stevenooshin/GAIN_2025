@@ -122,7 +122,7 @@
                             <h3 class="font-bold text-lg uppercase tracking-wide">Daily Accountability</h3>
                         </div>
                         <div id="daily-checklist" class="space-y-4">
-                            <p class="text-sm text-gray-500 italic" id="checklist-loading">Loading your data...</p>
+                            <p class="text-sm text-yellow-500 italic" id="checklist-loading">Connecting to database...</p>
                             <!-- Injected by JS -->
                         </div>
                     </div>
@@ -255,7 +255,6 @@
         // --- FIREBASE INIT & CONFIG ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'transformation-app-2026';
         
-        // 🚨 IMPORTANT FOR GITHUB: Paste your Firebase config here!
         let firebaseConfig = {
             apiKey: "AIzaSyB-tRi_B3fy1cXzkPPToSshS5U9nyLd5lw",
             authDomain: "rise-and-shine-a36bd.firebaseapp.com",
@@ -267,11 +266,9 @@
         };
         
         try {
-            // This safely falls back to the preview environment database if you are testing here
             if (typeof __firebase_config !== 'undefined' && __firebase_config) {
                 firebaseConfig = JSON.parse(__firebase_config);
             } else if (Object.keys(firebaseConfig).length === 0) {
-                // Mock config for local viewing without errors if variables not present
                 firebaseConfig = { projectId: "mock-project" }; 
             }
         } catch(e) { 
@@ -295,7 +292,6 @@
             { time: "7:00 PM", meal: "Dinner", details: "200g lean beef (or 1.5 cups lentils), 1 large sweet potato, side salad" }
         ];
 
-        // Added real photography placeholders to match the card style
         const workoutData = {
             upperA: [
                 { name: "Dumbbell Bench Press", sets: 3, reps: "8-12", rest: "90s", img: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=250&fit=crop" },
@@ -452,10 +448,15 @@
         }
 
         async function authenticateUser() {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Auth Error:", error);
+                document.getElementById('checklist-loading').innerHTML = `<span class="text-red-500">Auth Error: ${error.message} <br> (Did you authorize your GitHub domain in Firebase Settings?)</span>`;
             }
         }
 
@@ -493,7 +494,7 @@
                 });
             }, (error) => {
                 console.error("Checklist error:", error);
-                document.getElementById('checklist-loading').textContent = "Error loading data.";
+                document.getElementById('checklist-loading').innerHTML = `<span class="text-red-500">Database Error: ${error.message}</span>`;
             });
         }
 
